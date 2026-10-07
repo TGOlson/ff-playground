@@ -72,7 +72,7 @@ export function IconButton({ className, children, ...rest }: ButtonHTMLAttribute
   return (
     <button
       className={clsx(
-        'inline-flex size-9 shrink-0 items-center justify-center rounded-full text-ink-2 transition hover:bg-surface-2 active:scale-95',
+        'inline-flex size-9 shrink-0 items-center justify-center rounded-md text-ink-2 transition hover:bg-surface-2 active:scale-95',
         className,
       )}
       {...rest}
@@ -135,7 +135,7 @@ export function StatusBadge({ status }: { status: InjuryStatus }) {
 
 export function Pill({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={clsx('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold', className)}>
+    <span className={clsx('inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-[11px] font-semibold', className)}>
       {children}
     </span>
   )
@@ -154,7 +154,7 @@ export function LiveDot({ className }: { className?: string }) {
 export function TeamAvatar({ team, size = 40, className }: { team: FantasyTeam; size?: number; className?: string }) {
   return (
     <div
-      className={clsx('relative flex shrink-0 items-center justify-center rounded-[30%] font-bold text-white', className)}
+      className={clsx('relative flex shrink-0 items-center justify-center rounded-[4px] font-bold text-white', className)}
       style={{
         width: size,
         height: size,
@@ -216,7 +216,7 @@ export function Segmented<T extends string>({
           aria-selected={value === o.value}
           onClick={() => onChange(o.value)}
           className={clsx(
-            'flex-1 whitespace-nowrap rounded-[9px] font-semibold transition-all',
+            'flex-1 whitespace-nowrap rounded-[3px] font-semibold transition-all',
             size === 'sm' ? 'h-7 px-2.5' : 'h-8 px-3.5',
             value === o.value ? 'bg-surface text-ink shadow-card ring-1 ring-line' : 'text-muted hover:text-ink',
           )}
@@ -243,7 +243,7 @@ export function Chip({
     <button
       onClick={onClick}
       className={clsx(
-        'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-semibold transition active:scale-95',
+        'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 text-[13px] font-semibold transition active:scale-95',
         active ? 'border-ink bg-ink text-surface' : 'border-line bg-surface text-ink-2 hover:border-line-strong',
         className,
       )}
@@ -353,13 +353,13 @@ export function Select<T extends string | number>({
 // ─── bars ───────────────────────────────────────────────────────────────────
 export function WinProbBar({ pct, leftHue, rightHue }: { pct: number; leftHue: number; rightHue: number }) {
   return (
-    <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
+    <div className="flex h-1.5 w-full overflow-hidden bg-surface-3">
       <div
-        className="h-full rounded-l-full transition-[width] duration-700"
+        className="h-full transition-[width] duration-700"
         style={{ width: `${pct * 100}%`, background: `hsl(${leftHue} 70% 52%)` }}
       />
       <div className="w-0.5 bg-surface" />
-      <div className="h-full flex-1 rounded-r-full" style={{ background: `hsl(${rightHue} 70% 52%)` }} />
+      <div className="h-full flex-1" style={{ background: `hsl(${rightHue} 70% 52%)` }} />
     </div>
   )
 }
@@ -398,7 +398,7 @@ export function Sheet({
         role="dialog"
         aria-modal="true"
         className={clsx(
-          'relative flex max-h-[92dvh] w-full animate-sheet-up flex-col overflow-hidden rounded-t-[28px] bg-surface shadow-pop sm:rounded-3xl',
+          'relative flex max-h-[92dvh] w-full animate-sheet-up flex-col overflow-hidden rounded-t-xl bg-surface shadow-pop sm:rounded-xl',
           wide ? 'sm:max-w-2xl' : 'sm:max-w-md',
         )}
       >

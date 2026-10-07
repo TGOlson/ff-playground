@@ -42,7 +42,7 @@ export function Matchup() {
               key={a}
               to={`/matchup/${a === MY_TEAM_ID || b === MY_TEAM_ID ? MY_TEAM_ID : a}`}
               className={clsx(
-                'flex shrink-0 items-center gap-1.5 rounded-full border py-1 pl-1 pr-3 text-[12.5px] font-semibold transition',
+                'flex shrink-0 items-center gap-1.5 rounded-md border py-1 pl-1 pr-3 text-[12.5px] font-semibold transition',
                 active ? 'border-ink bg-ink text-surface' : 'border-line bg-surface text-ink-2 hover:border-line-strong',
               )}
             >

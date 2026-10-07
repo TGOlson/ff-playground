@@ -93,7 +93,7 @@ export function Settings() {
             key={s.id}
             onClick={() => jump(s.id)}
             className={clsx(
-              'h-8 shrink-0 rounded-full px-3.5 text-[13px] font-semibold transition',
+              'h-8 shrink-0 rounded-md px-3.5 text-[13px] font-semibold transition',
               active === s.id ? 'bg-ink text-surface' : 'text-muted hover:text-ink',
             )}
           >

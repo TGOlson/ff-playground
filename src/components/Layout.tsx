@@ -18,7 +18,7 @@ const NAV = [
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2.5">
-      <div className="flex size-8 items-center justify-center rounded-[10px] bg-accent text-accent-ink">
+      <div className="flex size-8 items-center justify-center rounded-[5px] bg-accent text-accent-ink">
         <svg viewBox="0 0 32 32" className="size-5">
           <path d="M6 24c4-11 12-16 20-16-1.5 6-6.5 14-20 16Z" fill="currentColor" />
           <path d="M11 21l8-8" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
@@ -192,7 +192,7 @@ function TabBar() {
               <>
                 <span
                   className={clsx(
-                    'flex h-7 w-12 items-center justify-center rounded-full transition-colors',
+                    'flex h-7 w-12 items-center justify-center rounded-md transition-colors',
                     isActive && 'bg-accent-soft',
                   )}
                 >
@@ -215,7 +215,7 @@ function Toasts() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="animate-rise rounded-full bg-ink px-4 py-2.5 text-[13.5px] font-semibold text-surface shadow-pop"
+          className="animate-rise rounded-md bg-ink px-4 py-2.5 text-[13.5px] font-semibold text-surface shadow-pop"
         >
           {t.text}
         </div>

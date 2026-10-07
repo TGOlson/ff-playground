@@ -114,11 +114,11 @@ export function buildWeek(week: number, myLineup?: Record<string, string | null>
     const ghost = ghostScore(t.id, week)
     const games: GameResult[] = [
       { key: 'h2h', you: score, target: scoreOf(oppId), win: score > scoreOf(oppId), label: TEAMS[oppId].name },
-      { key: 'median', you: score, target: med, win: score > med, label: 'League median' },
-      { key: 'proj', you: score, target: proj, win: score > proj, label: 'Pre-game projection' },
+      { key: 'median', you: score, target: med, win: score > med, label: 'Middle of all 12 scores' },
+      { key: 'proj', you: score, target: proj, win: score > proj, label: "Starters' pre-game projection" },
       { key: 'ghost', you: score, target: ghost, win: score > ghost, label: `${SEASON - 1} ${t.name}` },
-      { key: 'ghostMedian', you: score, target: ghostMedian, win: score > ghostMedian, label: `${SEASON - 1} median` },
-      { key: 'waiver', you: score, target: waiverScore, win: score > waiverScore, label: 'Waiver Wire All-Stars' },
+      { key: 'ghostMedian', you: score, target: ghostMedian, win: score > ghostMedian, label: `League median, Week ${week} ${SEASON - 1}` },
+      { key: 'waiver', you: score, target: waiverScore, win: score > waiverScore, label: 'Best free-agent lineup, in hindsight' },
     ]
     return {
       teamId: t.id,

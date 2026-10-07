@@ -229,7 +229,7 @@ export function Players() {
 
       {list.length > limit && (
         <div className="mt-4 flex justify-center">
-          <button onClick={() => setLimit((l) => l + 40)} className="h-10 rounded-full border border-line bg-surface px-5 text-[13.5px] font-semibold shadow-card hover:bg-surface-2">
+          <button onClick={() => setLimit((l) => l + 40)} className="h-10 rounded-md border border-line bg-surface px-5 text-[13.5px] font-semibold shadow-card hover:bg-surface-2">
             Show more
           </button>
         </div>
@@ -265,7 +265,7 @@ function RowAction({
     return (
       <button
         onClick={onAdd}
-        className="inline-flex size-9 items-center justify-center rounded-full bg-accent-soft text-accent transition hover:bg-accent hover:text-accent-ink active:scale-90"
+        className="inline-flex size-9 items-center justify-center rounded-md bg-accent-soft text-accent transition hover:bg-accent hover:text-accent-ink active:scale-90"
         aria-label="Add player"
       >
         <Plus className="size-[18px]" strokeWidth={2.5} />
