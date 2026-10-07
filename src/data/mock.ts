@@ -380,7 +380,7 @@ PLAYERS.forEach((p) => {
   }
 })
 
-function bestLineup(roster: Player[], score: (p: Player) => number) {
+export function bestLineup(roster: Player[], score: (p: Player) => number) {
   const lineup: Record<string, string | null> = {}
   const used = new Set<string>()
   const pool = [...roster].filter((p) => p.status !== 'IR')

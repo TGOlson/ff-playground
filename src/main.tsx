@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { StoreProvider } from './lib/store'
+import { Gauntlet } from './pages/Gauntlet'
 import { Home } from './pages/Home'
 import { League } from './pages/League'
 import { Matchup } from './pages/Matchup'
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="matchup/:teamId" element={<Matchup />} />
             <Route path="team" element={<Team />} />
             <Route path="players" element={<Players />} />
+            <Route path="gauntlet" element={<Gauntlet />} />
             <Route path="league" element={<League />} />
             <Route path="league/settings" element={<Settings />} />
           </Route>

@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { ArrowLeftRight, ArrowRight, ChevronRight, CircleCheck, Gavel, Megaphone, Sparkles, TriangleAlert, UserPlus } from 'lucide-react'
+import { ArrowLeftRight, ArrowRight, ChevronRight, CircleCheck, Flame, Gavel, Megaphone, Sparkles, TriangleAlert, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Rise } from '../components/Layout'
 import { Card, LiveDot, PosBadge, SectionTitle, TeamAvatar, WinProbBar } from '../components/ui'
@@ -96,6 +96,21 @@ export function Home() {
                 sub="3 breakout players on waivers"
               />
             </div>
+          </Rise>
+
+          <Rise delay={150}>
+            <Link to="/gauntlet" className="group block">
+              <Card className="flex items-center gap-4 overflow-hidden p-4 transition group-hover:border-line-strong">
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-loss-soft text-loss">
+                  <Flame className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[14.5px] font-semibold">The Gauntlet</div>
+                  <div className="truncate text-[12.5px] text-muted">Six games a week, bonus wins, spankings, and the Bucket 🪣</div>
+                </div>
+                <ArrowRight className="size-4 shrink-0 text-faint transition group-hover:translate-x-0.5 group-hover:text-ink" />
+              </Card>
+            </Link>
           </Rise>
 
           {/* scoreboard */}

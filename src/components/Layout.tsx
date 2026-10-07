@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Bell, ChevronsUpDown, House, Moon, Search, Settings2, Shirt, Sun, Swords, Trophy, Monitor } from 'lucide-react'
+import { Bell, ChevronsUpDown, Flame, House, Moon, Search, Settings2, Shirt, Sun, Swords, Trophy, Monitor } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CURRENT_WEEK, LEAGUE_NAME, MY_TEAM_ID, SEASON, TEAMS } from '../data/mock'
@@ -109,10 +109,23 @@ function Sidebar() {
           </NavLink>
         ))}
         <NavLink
-          to="/league/settings"
+          to="/gauntlet"
           className={({ isActive }) =>
             clsx(
               'mt-2 flex h-10 items-center gap-3 rounded-xl px-3 text-[14px] font-semibold transition',
+              isActive ? 'bg-surface text-ink shadow-card ring-1 ring-line' : 'text-muted hover:bg-surface-2 hover:text-ink',
+            )
+          }
+        >
+          <Flame className="size-[18px]" />
+          The Gauntlet
+          <span className="ml-auto rounded-md bg-loss-soft px-1.5 py-0.5 text-[10px] font-bold text-loss">NEW</span>
+        </NavLink>
+        <NavLink
+          to="/league/settings"
+          className={({ isActive }) =>
+            clsx(
+              'flex h-10 items-center gap-3 rounded-xl px-3 text-[14px] font-semibold transition',
               isActive ? 'bg-surface text-ink shadow-card ring-1 ring-line' : 'text-muted hover:bg-surface-2 hover:text-ink',
             )
           }
