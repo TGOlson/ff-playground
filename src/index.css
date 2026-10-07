@@ -1,0 +1,151 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --surface-3: #e7eaef;
+  --line: #e4e7ec;
+  --line-strong: #d2d6dd;
+  --ink: #0e1217;
+  --ink-2: #2b333d;
+  --muted: #667180;
+  --faint: #9aa3af;
+  --accent: #4f46e5;
+  --accent-ink: #ffffff;
+  --accent-soft: #eef0ff;
+  --accent-strong: #3730a3;
+  --win: #15924a;
+  --win-soft: #e7f6ec;
+  --loss: #d92d4b;
+  --loss-soft: #fdecef;
+  --warn: #b7791f;
+  --warn-soft: #fdf4e3;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-lg: 0 12px 32px -8px rgb(16 24 40 / 0.18), 0 4px 8px -4px rgb(16 24 40 / 0.06);
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0a0c10;
+  --surface: #12151b;
+  --surface-2: #181c24;
+  --surface-3: #212632;
+  --line: #222733;
+  --line-strong: #2e3442;
+  --ink: #edf0f5;
+  --ink-2: #c9cfd9;
+  --muted: #8a94a6;
+  --faint: #5d6677;
+  --accent: #7c83ff;
+  --accent-ink: #0a0c10;
+  --accent-soft: #1d2040;
+  --accent-strong: #a5aaff;
+  --win: #3ddc84;
+  --win-soft: #0f2a1c;
+  --loss: #ff6b81;
+  --loss-soft: #33141b;
+  --warn: #f5b84a;
+  --warn-soft: #2e2310;
+  --shadow: 0 0 0 1px rgb(255 255 255 / 0.02);
+  --shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-strong: var(--accent-strong);
+  --color-win: var(--win);
+  --color-win-soft: var(--win-soft);
+  --color-loss: var(--loss);
+  --color-loss-soft: var(--loss-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-lg);
+
+  --animate-sheet-up: sheet-up 280ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  --animate-fade-in: fade-in 200ms ease-out;
+  --animate-rise: rise 360ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+
+  @keyframes sheet-up {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rise {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    overscroll-behavior-y: none;
+  }
+  button {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
