@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { ArrowUpRight, ChevronDown, ChevronRight, Ghost, History, Info, Scale, Star, Swords, Target } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, ChevronRight, Info, Play, Zap } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Rise } from '../components/Layout'
@@ -10,79 +10,10 @@ import {
 } from '../data/gauntlet'
 import { CURRENT_WEEK, MY_TEAM_ID, SEASON, TEAMS, playerById } from '../data/mock'
 import { useStore } from '../lib/store'
+import { mockSimOff, officialSimOffs, type SimOff } from '../data/simMock'
+import { SimOffPanel, SimOffView, SimSeasonView, SimWeekView } from './GauntletSim'
 
-const ICONS: Record<GameKey, typeof Swords> = {
-  h2h: Swords,
-  median: Scale,
-  proj: Target,
-  ghost: Ghost,
-  ghostMedian: History,
-  waiver: Star,
-}
-const pct = (x: number, d = 1) => `${(x * 100).toFixed(d)}%`
-const signed = (n: number) => `${n >= 0 ? '+' : '−'}${Math.abs(n).toFixed(1)}`
-const def = (k: GameKey) => GAMES.find((g) => g.key === k)!
-/** Background for a 0..1 intensity on the win color, blended into the neutral track. */
-const winMix = (t: number) => `color-mix(in srgb, var(--win) ${Math.round(12 + t * 88)}%, var(--surface-3))`
-
-// ─── primitives (local to this data-dense view) ─────────────────────────────
-function Panel({ title, meta, right, children, className, flush }: {
-  title: ReactNode
-  meta?: ReactNode
-  right?: ReactNode
-  children: ReactNode
-  className?: string
-  flush?: boolean
-}) {
-  return (
-    <section className={clsx('overflow-hidden rounded-md border border-line bg-surface', className)}>
-      <header className="flex h-10 items-center gap-3 border-b border-line px-3.5">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.08em] text-ink">{title}</h2>
-        {meta && <span className="truncate font-mono text-[11px] text-faint">{meta}</span>}
-        <div className="ml-auto flex items-center gap-2">{right}</div>
-      </header>
-      <div className={flush ? '' : 'p-3.5'}>{children}</div>
-    </section>
-  )
-}
-
-const Micro = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <span className={clsx('text-[10px] font-bold uppercase tracking-[0.08em] text-faint', className)}>{children}</span>
-)
-
-const Num = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <span className={clsx('font-mono tabular-nums', className)}>{children}</span>
-)
-
-function ResultCell({ win, size = 22, live, title }: { win: boolean; size?: number; live?: boolean; title?: string }) {
-  return (
-    <span
-      title={title}
-      className={clsx(
-        'inline-flex shrink-0 items-center justify-center rounded-[2px] font-mono text-[10.5px] font-bold',
-        win ? 'bg-win text-white dark:text-black' : 'bg-loss/15 text-loss',
-        live && 'opacity-55',
-      )}
-      style={{ width: size, height: size }}
-    >
-      {win ? 'W' : 'L'}
-    </span>
-  )
-}
-
-/** Centered bar: grows right (green) for positive margins, left (red) for negative. */
-function Diverging({ value, scale }: { value: number; scale: number }) {
-  const w = Math.min(Math.abs(value) / scale, 1) * 50
-  return (
-    <div className="relative h-1.5 w-full bg-surface-3">
-      <div className="absolute inset-y-[-3px] left-1/2 w-px bg-line-strong" />
-      <div
-        className={clsx('absolute inset-y-0', value >= 0 ? 'left-1/2 bg-win' : 'right-1/2 bg-loss')}
-        style={{ width: `${w}%` }}
-      />
-    </div>
-  )
-}
+import { Diverging, ICONS, Micro, Num, Panel, ResultCell, def, pct, signed, winMix } from '../components/data'
 
 // ─── page ───────────────────────────────────────────────────────────────────
 export function Gauntlet() {
@@ -91,7 +22,8 @@ export function Gauntlet() {
     () => Array.from({ length: CURRENT_WEEK }, (_, i) => buildWeek(i + 1, lineup, MY_TEAM_ID)),
     [lineup],
   )
-  const season = useMemo(() => buildSeason(weeks), [weeks])
+  const simOffs = useMemo(() => officialSimOffs(weeks), [weeks])
+  const season = useMemo(() => buildSeason(weeks, simOffs.map((s) => s.winner)), [weeks, simOffs])
   // open on the latest finished week where you had a mixed result (more to look at than a sweep)
   const [week, setWeek] = useState(() => {
     const done = weeks.filter((w) => !w.live).reverse()
@@ -99,10 +31,12 @@ export function Gauntlet() {
   })
   const [focus, setFocus] = useState(MY_TEAM_ID)
   const [open, setOpen] = useState<GameKey | null>(null)
-  const [sheet, setSheet] = useState<null | 'rules' | 'weekly' | 'bucket'>(null)
+  const [sheet, setSheet] = useState<null | 'rules' | 'weekly' | 'bucket' | 'simoff' | 'simweek' | 'simseason'>(null)
+  const [previewSalt, setPreviewSalt] = useState(0)
 
   const W = weeks[week - 1]
   const T = W.teams[focus]
+  const so: SimOff = W.live ? mockSimOff(W, previewSalt) : simOffs.find((s) => s.week === week)!
   const team = TEAMS[focus]
   const weekRank = [...W.teams].sort((a, b) => b.wins - a.wins || b.score - a.score).findIndex((t) => t.teamId === focus) + 1
   const seasonRow = season.find((r) => r.teamId === focus)!
@@ -131,15 +65,40 @@ export function Gauntlet() {
             <span className="rounded-[2px] bg-ink px-1.5 py-0.5 font-mono text-[10px] font-semibold text-surface">6×/WK</span>
           </div>
           <div className="mt-1 font-mono text-[11.5px] text-muted">
-            {SEASON} · 12 TEAMS · 6 GAMES/WK · +1 BONUS · BUCKET @ WK 17
+            {SEASON} · 12 TEAMS · 6 GAMES/WK · 🏅 BONUS · ⚡ SIM-OFF · 🪣 @ WK 17
           </div>
         </div>
-        <button
-          onClick={() => setSheet('rules')}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-[12.5px] font-semibold hover:bg-surface-2"
-        >
-          <Info className="size-3.5" /> Rules
-        </button>
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="inline-flex flex-1 divide-x divide-line overflow-hidden rounded-md border border-ink bg-ink text-surface sm:flex-none">
+            {(
+              [
+                ['simoff', <Zap key="z" className="size-3.5" />, 'SIM-OFF', 'SIM-OFF'],
+                ['simweek', <Play key="p" className="size-3.5" />, 'SIM WEEK', 'WEEK'],
+                ['simseason', <Play key="s" className="size-3.5" />, 'SIM SEASON', 'SEASON'],
+              ] as const
+            ).map(([k, icon, label, short]) => (
+              <button
+                key={k}
+                onClick={() => {
+                  if (k === 'simoff' && W.live) setPreviewSalt((s) => s + 1)
+                  setSheet(k)
+                }}
+                className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 whitespace-nowrap border-surface/15 px-2.5 font-mono text-[11px] font-semibold tracking-wide transition hover:bg-surface/10"
+              >
+                {icon}
+                <span className="sm:hidden">{short}</span>
+                <span className="hidden sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setSheet('rules')}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-[12.5px] font-semibold hover:bg-surface-2"
+          >
+            <Info className="size-3.5" />
+            <span className="hidden sm:inline">Rules</span>
+          </button>
+        </div>
       </div>
 
       {/* ── controls ── */}
@@ -193,6 +152,7 @@ export function Gauntlet() {
                 </Num>
                 <div className="pb-1">
                   {T.bonus && <div className="font-mono text-[11px] font-semibold text-win">+1 BONUS 🏅</div>}
+                  {!so.preview && so.winner === focus && <div className="font-mono text-[11px] font-semibold text-win">+1 SIM-OFF ⚡</div>}
                   {T.spanked && <div className="font-mono text-[11px] font-semibold text-loss">SPANKED 🖐️</div>}
                   <div className="font-mono text-[11px] text-muted">#{weekRank} of 12 this week</div>
                 </div>
@@ -292,20 +252,32 @@ export function Gauntlet() {
               </div>
             </Panel>
           </Rise>
+          <Rise delay={180}>
+            <SimOffPanel so={so} onOpen={() => setSheet('simoff')} />
+          </Rise>
         </div>
       </div>
 
       {/* ── league views ── */}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-2">
         <Rise delay={160}>
-          <WeekMatrix W={W} focus={focus} onTeam={pickTeam} />
+          <WeekMatrix W={W} focus={focus} onTeam={pickTeam} simOffWinner={so.preview ? undefined : so.winner} />
         </Rise>
         <Rise delay={200}>
-          <SeasonTable rows={season} focus={focus} onTeam={pickTeam} onWeek={setWeek} />
+          <SeasonTable rows={season} focus={focus} onTeam={pickTeam} onWeek={setWeek} simOffs={simOffs} />
         </Rise>
       </div>
 
       {/* ── sheets ── */}
+      <Sheet open={sheet === 'simoff'} onClose={() => setSheet(null)} title={`⚡ Sim-off · Week ${week}${so.preview ? ' preview' : ''}`} wide>
+        <SimOffView so={so} onRerun={() => setPreviewSalt((s) => s + 1)} />
+      </Sheet>
+      <Sheet open={sheet === 'simweek'} onClose={() => setSheet(null)} title={`Sim week ${week} · ${team.name}`} wide>
+        <SimWeekView W={W} teamId={focus} />
+      </Sheet>
+      <Sheet open={sheet === 'simseason'} onClose={() => setSheet(null)} title="Sim season" wide>
+        <SimSeasonView rows={season} focus={focus} onTeam={(id) => setFocus(id)} />
+      </Sheet>
       <Sheet open={sheet === 'rules'} onClose={() => setSheet(null)} title="Rules">
         <Rules />
       </Sheet>
@@ -695,7 +667,7 @@ function Ladder({ items, focus, onTeam }: {
 }
 
 // ─── league views ───────────────────────────────────────────────────────────
-function WeekMatrix({ W, focus, onTeam }: { W: WeekSummary; focus: number; onTeam: (id: number) => void }) {
+function WeekMatrix({ W, focus, onTeam, simOffWinner }: { W: WeekSummary; focus: number; onTeam: (id: number) => void; simOffWinner?: number }) {
   const rows = [...W.teams].sort((a, b) => b.wins - a.wins || b.score - a.score)
   const cols = 'grid-cols-[18px_minmax(0,1fr)_repeat(6,20px)_28px_48px] sm:grid-cols-[18px_minmax(0,1fr)_repeat(6,22px)_32px_52px_52px]'
   return (
@@ -732,6 +704,7 @@ function WeekMatrix({ W, focus, onTeam }: { W: WeekSummary; focus: number; onTea
             <span className="hidden sm:inline">{TEAMS[t.teamId].name}</span>
             {t.bonus && ' 🏅'}
             {t.spanked && ' 🖐️'}
+            {t.teamId === simOffWinner && ' ⚡'}
           </span>
           {t.games.map((g) => (
             <ResultCell key={g.key} win={g.win} size={20} live={W.live} title={`${def(g.key).title}: ${g.you.toFixed(1)} vs ${g.target.toFixed(1)}`} />
@@ -745,9 +718,9 @@ function WeekMatrix({ W, focus, onTeam }: { W: WeekSummary; focus: number; onTea
   )
 }
 
-function SeasonTable({ rows, focus, onTeam, onWeek }: { rows: SeasonRow[]; focus: number; onTeam: (id: number) => void; onWeek: (w: number) => void }) {
+function SeasonTable({ rows, focus, onTeam, onWeek, simOffs }: { rows: SeasonRow[]; focus: number; onTeam: (id: number) => void; onWeek: (w: number) => void; simOffs: SimOff[] }) {
   const [open, setOpen] = useState<number | null>(null)
-  const cols = 'grid-cols-[18px_minmax(0,1fr)_48px_24px_24px_16px] sm:grid-cols-[18px_minmax(0,1fr)_96px_48px_24px_24px_44px_16px]'
+  const cols = 'grid-cols-[18px_minmax(0,1fr)_48px_20px_20px_20px_16px] sm:grid-cols-[18px_minmax(0,1fr)_96px_48px_24px_24px_24px_44px_16px]'
   return (
     <Panel title="Season" meta={`WK01–WK${String(CURRENT_WEEK - 1).padStart(2, '0')} · tap to expand`} flush>
       <div className={clsx('grid items-center gap-x-2 border-b border-line bg-surface-2/50 px-3.5 py-1.5', cols)}>
@@ -756,6 +729,7 @@ function SeasonTable({ rows, focus, onTeam, onWeek }: { rows: SeasonRow[]; focus
         <Micro className="hidden sm:block">Weekly W</Micro>
         <Micro className="text-right">W-L</Micro>
         <span className="text-center text-[10px]">🏅</span>
+        <span className="text-center text-[10px]">⚡</span>
         <span className="text-center text-[10px]">🖐️</span>
         <Micro className="hidden text-right sm:block">Eff</Micro>
         <span />
@@ -785,6 +759,7 @@ function SeasonTable({ rows, focus, onTeam, onWeek }: { rows: SeasonRow[]; focus
                 {r.wins}-{r.losses}
               </Num>
               <Num className="text-center text-[12px]">{r.bonuses || '·'}</Num>
+              <Num className="text-center text-[12px]">{r.simOffs || '·'}</Num>
               <Num className="text-center text-[12px]">{r.spankings || '·'}</Num>
               <Num className="hidden text-right text-[12px] text-ink-2 sm:block">{pct(r.efficiency, 0)}</Num>
               <ChevronDown className={clsx('size-3.5 text-faint transition', isOpen && 'rotate-180')} />
@@ -830,7 +805,10 @@ function SeasonTable({ rows, focus, onTeam, onWeek }: { rows: SeasonRow[]; focus
                           <Num className="text-[11px] font-semibold">
                             {w.wins}–{6 - w.wins}
                           </Num>
-                          <span className="text-[11px]">{w.bonus ? '🏅' : w.spanked ? '🖐️' : ''}</span>
+                          <span className="text-[11px]">
+                            {w.bonus ? '🏅' : w.spanked ? '🖐️' : ''}
+                            {simOffs.some((x) => x.week === w.week && x.winner === r.teamId) ? '⚡' : ''}
+                          </span>
                           {w.week === CURRENT_WEEK && <Num className="text-[10px] font-semibold text-loss">LIVE</Num>}
                         </button>
                       ))}
@@ -872,6 +850,10 @@ function Rules() {
         <p>
           <span className="font-semibold">🏅 Bonus win</span>{' '}
           <span className="text-ink-2">Most efficient manager each week gets a 7th win. Efficiency = points started ÷ best lineup possible from your roster.</span>
+        </p>
+        <p>
+          <span className="font-semibold">⚡ Sim-off</span>{' '}
+          <span className="text-ink-2">The week's top two Gauntlet records replay the week in a sim. Winner gets another bonus win.</span>
         </p>
         <p>
           <span className="font-semibold">🖐️ Spanking</span>{' '}

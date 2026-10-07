@@ -145,24 +145,27 @@ export interface SeasonRow {
   wins: number
   losses: number
   bonuses: number
+  simOffs: number
   spankings: number
   efficiency: number // average across completed weeks
   byGame: Record<GameKey, number> // wins per game type
   weeks: TeamWeek[]
 }
 
-export function buildSeason(weeks: WeekSummary[]): SeasonRow[] {
+export function buildSeason(weeks: WeekSummary[], simOffWinners: number[] = []): SeasonRow[] {
   const done = weeks.filter((w) => !w.live)
   return TEAMS.map((t) => {
     const tw = done.map((w) => w.teams[t.id])
     const byGame = Object.fromEntries(GAMES.map((g) => [g.key, 0])) as Record<GameKey, number>
     tw.forEach((w) => w.games.forEach((g) => g.win && byGame[g.key]++))
-    const wins = tw.reduce((a, w) => a + w.wins + (w.bonus ? 1 : 0), 0)
+    const simOffs = simOffWinners.filter((id) => id === t.id).length
+    const wins = tw.reduce((a, w) => a + w.wins + (w.bonus ? 1 : 0), 0) + simOffs
     return {
       teamId: t.id,
       wins,
       losses: tw.length * 6 - tw.reduce((a, w) => a + w.wins, 0),
       bonuses: tw.filter((w) => w.bonus).length,
+      simOffs,
       spankings: tw.filter((w) => w.spanked).length,
       efficiency: tw.reduce((a, w) => a + w.efficiency, 0) / Math.max(1, tw.length),
       byGame,
